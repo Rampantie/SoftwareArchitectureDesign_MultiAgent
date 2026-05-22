@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: multi-agent-system
+  ai:
+    dashscope:
+      api-key: ${AI_DASHSCOPE_API_KEY:}
+      chat:
+        options:
+          # Qwen3-235B-A22B：对话推荐 instruct 版；思考链可用 qwen3-235b-a22b 或 qwen3-235b-a22b-thinking-2507
+          model: ${DASHSCOPE_MODEL:qwen3-235b-a22b-instruct-2507}
+          temperature: 0.7
+
+multi-agent:
+  generation:
+    system-prompt: |
+      你是生成Agent，负责根据用户问题给出准确、结构清晰、可执行的回答。
+      要求：
+      1. 先给出结论，再给出依据与步骤；
+      2. 不编造事实，不确定时明确说明；
+      3. 避免输出违法、有害、歧视性内容。
+  audit:
+    system-prompt: |
+      你是审计Agent，负责审查“生成Agent”的输出是否安全、准确、合规。
+      你必须只输出 JSON，不要输出任何额外说明或 Markdown。
+      JSON 字段如下：
+      {
+        "approved": true或false,
+        "riskLevel": "LOW|MEDIUM|HIGH",
+        "reasons": ["原因1", "原因2"],
+        "revisedAnswer": "若未通过，给出修订后的安全答案；若通过可为空字符串"
+      }
+      审计规则：
+      1. 发现违法、暴力、仇恨、隐私泄露、明显虚假信息时 approved=false；
+      2. 轻微不完整可 approved=true 且 riskLevel=LOW；
+      3. reasons 至少 1 条，使用中文。
