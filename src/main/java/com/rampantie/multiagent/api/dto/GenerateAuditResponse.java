@@ -8,6 +8,8 @@ public class GenerateAuditResponse {
     private String finalAnswer;
     private boolean approved;
     private AuditResultDto audit;
+    private int retryCount;
+    private int totalAttempts;
 
     public GenerateAuditResponse() {
     }
@@ -18,12 +20,25 @@ public class GenerateAuditResponse {
                                  String finalAnswer,
                                  boolean approved,
                                  AuditResultDto audit) {
+        this(traceId, input, generatedAnswer, finalAnswer, approved, audit, 0, 1);
+    }
+
+    public GenerateAuditResponse(String traceId,
+                                 String input,
+                                 String generatedAnswer,
+                                 String finalAnswer,
+                                 boolean approved,
+                                 AuditResultDto audit,
+                                 int retryCount,
+                                 int totalAttempts) {
         this.traceId = traceId;
         this.input = input;
         this.generatedAnswer = generatedAnswer;
         this.finalAnswer = finalAnswer;
         this.approved = approved;
         this.audit = audit;
+        this.retryCount = retryCount;
+        this.totalAttempts = totalAttempts;
     }
 
     public String getTraceId() {
@@ -72,5 +87,21 @@ public class GenerateAuditResponse {
 
     public void setAudit(AuditResultDto audit) {
         this.audit = audit;
+    }
+
+    public int getRetryCount() {
+        return retryCount;
+    }
+
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
+    }
+
+    public int getTotalAttempts() {
+        return totalAttempts;
+    }
+
+    public void setTotalAttempts(int totalAttempts) {
+        this.totalAttempts = totalAttempts;
     }
 }

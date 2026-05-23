@@ -6,6 +6,7 @@ import com.rampantie.multiagent.api.dto.AuditResultDto;
 import com.rampantie.multiagent.api.dto.GenerateAuditRequest;
 import com.rampantie.multiagent.api.dto.GenerateAuditResponse;
 import com.rampantie.multiagent.audit.AuditDecision;
+import com.rampantie.multiagent.config.AgentProperties;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -15,20 +16,38 @@ public class MultiAgentOrchestratorService {
 
     private final GenerationAgent generationAgent;
     private final AuditAgent auditAgent;
+    private final AgentProperties agentProperties;
 
-    public MultiAgentOrchestratorService(GenerationAgent generationAgent, AuditAgent auditAgent) {
+    public MultiAgentOrchestratorService(GenerationAgent generationAgent,
+                                         AuditAgent auditAgent,
+                                         AgentProperties agentProperties) {
         this.generationAgent = generationAgent;
         this.auditAgent = auditAgent;
+        this.agentProperties = agentProperties;
     }
 
     public GenerateAuditResponse process(GenerateAuditRequest request) {
         String traceId = UUID.randomUUID().toString();
+        int maxRetries = Math.max(0, agentProperties.getOrchestration().getMaxRetries());
 
         String generated = generationAgent.generate(request.getInput(), request.getContext());
         AuditDecision decision = auditAgent.audit(request.getInput(), generated);
+        int retryCount = 0;
 
-        String finalAnswer = resolveFinalAnswer(generated, decision);
+        while (!decision.isApproved() && retryCount < maxRetries) {
+            generated = generationAgent.regenerate(
+                    request.getInput(),
+                    request.getContext(),
+                    generated,
+                    decision.getReasons(),
+                    decision.getRevisedAnswer()
+            );
+            decision = auditAgent.audit(request.getInput(), generated);
+            retryCount++;
+        }
+
         AuditResultDto auditResult = toDto(decision);
+        String finalAnswer = resolveFinalAnswer(generated, decision);
 
         return new GenerateAuditResponse(
                 traceId,
@@ -36,7 +55,9 @@ public class MultiAgentOrchestratorService {
                 generated,
                 finalAnswer,
                 auditResult.isApproved(),
-                auditResult
+                auditResult,
+                retryCount,
+                retryCount + 1
         );
     }
 

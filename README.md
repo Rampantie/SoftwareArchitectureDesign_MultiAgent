@@ -4,7 +4,25 @@
 
 1. **生成 Agent**：根据用户输入生成回答  
 2. **审计 Agent**：对生成结果做安全/合规审计，输出结构化 JSON  
-3. **编排服务**：串联「生成 → 审计」，返回统一 API 响应  
+3. **编排服务**：串联「生成 → 审计 →（不通过则带反馈重生成）→ 返回结果**
+
+## 工作流程（含审计反馈重试）
+
+```mermaid
+flowchart TD
+    user[用户] --> api[REST API]
+    api --> orch[编排服务]
+    orch --> gen[生成Agent]
+    gen --> audit[审计Agent]
+    audit -->|通过| out[返回结果]
+    audit -->|不通过且未超重试上限| regen[生成Agent带审计反馈重写]
+    regen --> audit
+    audit -->|仍不通过且已达上限| fallback[返回修订答案或最后一次生成]
+    fallback --> out
+```
+
+- 默认最多重试 **2 次**（不含首次生成），可在 `multi-agent.orchestration.max-retries` 配置
+- 重试时会把审计的 `reasons` 和 `revisedAnswer` 反馈给生成 Agent
 
 ## 环境要求
 
@@ -49,7 +67,9 @@ mvn spring-boot:run
 
 `POST /api/v1/agents/generate-and-audit`
 
-响应字段：`traceId`、`generatedAnswer`、`finalAnswer`、`approved`、`audit`。
+响应字段：`traceId`、`generatedAnswer`、`finalAnswer`、`approved`、`audit`、`retryCount`、`totalAttempts`。
+
+`retryCount` 表示审计不通过后实际重新生成了几次；`totalAttempts` 为总生成次数（含首次）。
 
 ## 配置说明
 
@@ -59,6 +79,7 @@ mvn spring-boot:run
 |--------|------|
 | `AI_DASHSCOPE_API_KEY` | 百炼 API Key（`sk-` 开头） |
 | `DASHSCOPE_MODEL` | 模型名，默认 `qwen3-235b-a22b-instruct-2507` |
+| `multi-agent.orchestration.max-retries` | 审计不通过时最多重生成次数，默认 `2` |
 
 ### 使用 Qwen3-235B-A22B（百炼）
 
@@ -68,6 +89,19 @@ mvn spring-boot:run
 | 思考链模式 | `qwen3-235b-a22b-thinking-2507` 或 `qwen3-235b-a22b` |
 
 在 [百炼控制台](https://bailian.console.aliyun.com/) 确认已开通对应模型；API Key 地域需与模型服务地域一致。
+
+### 审计规则概要
+
+审计 Agent 按 [`application.yml`](src/main/resources/application.yml) 中 `multi-agent.audit.system-prompt` 执行，主要维度：
+
+| 维度 | 不通过典型情况 |
+|------|----------------|
+| 安全合规 | 违法、暴力、仇恨、隐私泄露、虚假信息等 |
+| 准确可信 | 答非所问、概念错误、把推测当定论、关键约束遗漏 |
+| 完整结构 | 缺结论/步骤、对比题未覆盖要点、回答过短敷衍 |
+| 轻微瑕疵 | 表述冗余、缺例子等 → 可通过，`riskLevel=LOW` |
+
+修改规则后需重启服务生效。
 
 ## 测试
 

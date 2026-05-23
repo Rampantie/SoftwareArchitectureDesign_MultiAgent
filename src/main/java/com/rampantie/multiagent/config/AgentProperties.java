@@ -7,6 +7,7 @@ public class AgentProperties {
 
     private final Generation generation = new Generation();
     private final Audit audit = new Audit();
+    private final Orchestration orchestration = new Orchestration();
 
     public Generation getGeneration() {
         return generation;
@@ -14,6 +15,10 @@ public class AgentProperties {
 
     public Audit getAudit() {
         return audit;
+    }
+
+    public Orchestration getOrchestration() {
+        return orchestration;
     }
 
     public static class Generation {
@@ -37,6 +42,18 @@ public class AgentProperties {
 
         public void setSystemPrompt(String systemPrompt) {
             this.systemPrompt = systemPrompt;
+        }
+    }
+
+    public static class Orchestration {
+        private int maxRetries = 2;
+
+        public int getMaxRetries() {
+            return maxRetries;
+        }
+
+        public void setMaxRetries(int maxRetries) {
+            this.maxRetries = maxRetries;
         }
     }
 }
