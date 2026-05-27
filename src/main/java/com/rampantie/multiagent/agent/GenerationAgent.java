@@ -50,16 +50,17 @@ public class GenerationAgent {
 
             String content = result.content();
             if (content == null || content.isBlank()) {
-                throw new AgentInvocationException("生成Agent返回空内容");
+                throw new AgentInvocationException("Generation Agent returned empty content");
             }
 
-            // 基于内容长度估算token（改进算法）
-            // 中文：平均1.5字符 = 1 token
-            // 英文：平均4字符 = 1 token
+            // Estimate token count based on content length
             long inputTokens = estimateTokenCount(prompt);
             long outputTokens = estimateTokenCount(content);
 
-            tokenUsageTracker.recordUsage("GenerationAgent", -1, inputTokens, outputTokens);
+            // Determine step number based on prompt content
+            int stepNumber = determineStepNumber(prompt);
+
+            tokenUsageTracker.recordUsage("GenerationAgent", stepNumber, inputTokens, outputTokens);
             tokenUsageTracker.recordInteractionCall();
 
             return content.trim();
@@ -68,6 +69,20 @@ public class GenerationAgent {
         } catch (Exception ex) {
             throw new AgentInvocationException("Generation Agent call failed: " + ex.getMessage(), ex);
         }
+    }
+
+    private int determineStepNumber(String prompt) {
+        // Determine which ADD step this prompt is for based on content analysis
+        if (prompt.contains("架构设计") || prompt.contains("ADD 3.0") || prompt.contains("STEP")) {
+            return 5; // Full iteration design, assign to step 5 (core architecture step)
+        } else if (prompt.contains("记录") || prompt.contains("decision") || prompt.contains("Decision")) {
+            return 6; // Decision recording
+        } else if (prompt.contains("改进") || prompt.contains("regenerate") || prompt.contains("Regenerate")) {
+            return 5; // Improvement/regeneration
+        } else if (prompt.contains("审计") || prompt.contains("audit") || prompt.contains("Audit")) {
+            return 5; // Audit-related
+        }
+        return 5; // Default to core architecture step
     }
 
     private long estimateTokenCount(String text) {

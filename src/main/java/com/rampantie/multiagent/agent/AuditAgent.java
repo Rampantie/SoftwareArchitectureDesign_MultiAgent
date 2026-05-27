@@ -36,7 +36,7 @@ public class AuditAgent {
             long inputTokens = estimateTokenCount(prompt);
             long outputTokens = estimateTokenCount(content);
 
-            tokenUsageTracker.recordUsage("AuditAgent", -1, inputTokens, outputTokens);
+            tokenUsageTracker.recordUsage("AuditAgent", 5, inputTokens, outputTokens);
             tokenUsageTracker.recordInteractionCall();
 
             return auditResultParser.parse(content);

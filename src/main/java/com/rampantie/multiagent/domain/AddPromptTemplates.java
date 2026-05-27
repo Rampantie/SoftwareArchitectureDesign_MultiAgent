@@ -94,6 +94,8 @@ public class AddPromptTemplates {
         return String.format("""
                 You are a senior software architect proficient in ADD 3.0 methodology for system architecture design.
 
+                **IMPORTANT: You MUST respond ENTIRELY in English. Do NOT use Chinese or any other language. All output must be in English only.**
+
                 You are performing iteration %d of architecture design for a Hotel Pricing System (HPS).
                 This iteration's design objective is: %s
 
@@ -104,6 +106,7 @@ public class AddPromptTemplates {
                 %s
 
                 Now begin this iteration's architecture design. Follow ADD 3.0's 7 steps strictly and use the output format specified above.
+                **Output ONLY in English. All text, explanations, and responses must be in English.**
                 """,
                 iterationNumber,
                 iterationObjective,
@@ -127,6 +130,7 @@ public class AddPromptTemplates {
     private static String buildC1Prompt(String architectureDescription) {
         return """
                 Generate a C1 System Context Diagram based on the following architecture design.
+                **Output ONLY valid Mermaid code. Do NOT include any explanatory text.**
 
                 Architecture Description:
                 %s
@@ -138,9 +142,22 @@ public class AddPromptTemplates {
                    - Cloud identity service provider
                    - Channel Management System (CMS)
                 3. Show unidirectional/bidirectional relationships and data flows between system and external entities
-                4. Use Mermaid graph syntax, recommend graph LR (left to right) or graph TB (top to bottom)
-                5. Clearly show system boundary (rectangles for systems, circles or other shapes for external actors)
-                6. Output only Mermaid code block (wrapped in ```mermaid ... ```), no other explanatory text
+                4. Use Mermaid graph syntax with "graph LR" (left to right) layout
+                5. Example format:
+                ```mermaid
+                graph LR
+                    User["👤 User"]
+                    HPS["🏢 Hotel Pricing System"]
+                    IdService["☁️ Cloud Identity Service"]
+                    CMS["📊 Channel Management System"]
+
+                    User -->|Login Request| HPS
+                    HPS -->|Verify Credentials| IdService
+                    HPS -->|Push Prices| CMS
+                    CMS -->|Query Status| HPS
+                ```
+
+                6. Output ONLY the Mermaid code block (wrapped in ```mermaid ... ```), no other text.
 
                 Generate C1 diagram for this system:
                 """.formatted(architectureDescription);
@@ -149,6 +166,7 @@ public class AddPromptTemplates {
     private static String buildC2Prompt(String architectureDescription) {
         return """
                 Generate a C2 Container Diagram based on the following architecture design.
+                **Output ONLY valid Mermaid code. Do NOT include any explanatory text.**
 
                 Architecture Description:
                 %s
@@ -161,10 +179,38 @@ public class AddPromptTemplates {
                    - Message Broker (Kafka)
                    - Data stores (PostgreSQL, Redis, etc.)
                 2. Show communication relationships between containers and protocols used (HTTP/REST, Kafka, database drivers)
-                3. Use Mermaid graph/flowchart syntax
-                4. Each container should be labeled with its technology stack (e.g., Java/Spring Boot, Angular, PostgreSQL)
-                5. Clearly distinguish synchronous communication (arrows) from asynchronous communication (dashed arrows)
-                6. Output only Mermaid code block, no other explanatory text
+                3. Use Mermaid graph syntax
+                4. Example format:
+                ```mermaid
+                graph TB
+                    subgraph Clients["Clients"]
+                        WebUI["🌐 Web UI<br/>Angular"]
+                        MobileApp["📱 Mobile App"]
+                    end
+
+                    subgraph Backend["Backend Containers"]
+                        ApiGw["🚪 API Gateway<br/>Spring Boot"]
+                        PricingService["💰 Pricing Service<br/>Java"]
+                        QueryService["🔍 Query Service<br/>Java"]
+                    end
+
+                    subgraph Data["Data & Messaging"]
+                        Kafka["📨 Kafka<br/>Message Broker"]
+                        DB["🗄️ PostgreSQL<br/>Database"]
+                        Redis["⚡ Redis<br/>Cache"]
+                    end
+
+                    WebUI -->|HTTP/REST| ApiGw
+                    ApiGw -->|HTTP| PricingService
+                    ApiGw -->|HTTP| QueryService
+                    PricingService -->|Publish| Kafka
+                    Kafka -->|Subscribe| QueryService
+                    PricingService -->|SQL| DB
+                    QueryService -->|SQL| DB
+                    QueryService -->|Cache| Redis
+                ```
+
+                5. Output ONLY the Mermaid code block, no other text.
 
                 Generate C2 diagram for this system:
                 """.formatted(architectureDescription);

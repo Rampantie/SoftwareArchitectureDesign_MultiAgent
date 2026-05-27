@@ -39,34 +39,34 @@ public class ArchitectureDesignAgent {
                     previousContext
             );
 
-            // 调用生成Agent进行ADD设计，指定输出格式
+            // Call generation agent for ADD design with formatted output
             String designOutput = generationAgent.generateWithFormat(
-                    "请根据酒店定价系统的需求和约束，按照ADD 3.0方法进行第" + iterationNumber + "次迭代的架构设计",
+                    "Perform iteration " + iterationNumber + " of architecture design for the Hotel Pricing System according to ADD 3.0 methodology",
                     systemPrompt,
                     AddPromptTemplates.ADD_3_0_FRAMEWORK,
                     null,
                     null
             );
 
-            // 解析7个步骤的输出
+            // Parse outputs of 7 steps
             parseAndSetStepOutputs(result, designOutput);
 
-            // 审计关键步骤（步骤5）
+            // Audit key step (Step 5)
             auditStep5Output(result);
 
-            // 设置执行信息
+            // Set execution information
             result.setTraceId("trace_" + System.currentTimeMillis());
             result.setExecutionTimeMs(System.currentTimeMillis() - startTime);
 
         } catch (Exception ex) {
-            throw new AgentInvocationException("架构设计Agent执行失败: " + ex.getMessage(), ex);
+            throw new AgentInvocationException("Architecture Design Agent execution failed: " + ex.getMessage(), ex);
         }
 
         return result;
     }
 
     private void parseAndSetStepOutputs(AddIterationResult result, String fullOutput) {
-        // 使用正则表达式解析各个步骤的输出
+        // Use regex to parse outputs of each step
         Pattern stepPattern = Pattern.compile("--- STEP (\\d+)\\s*(\\w+)?\\s*OUTPUT ---([\\s\\S]*?)(?=--- STEP|$)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = stepPattern.matcher(fullOutput);
 
@@ -99,21 +99,21 @@ public class ArchitectureDesignAgent {
             }
         }
 
-        // 如果某些步骤解析失败，设置默认值
-        if (result.getStep1ReviewInputsOutput() == null) result.setStep1ReviewInputsOutput("[未能解析]");
-        if (result.getStep2DetermineObjectiveOutput() == null) result.setStep2DetermineObjectiveOutput("[未能解析]");
-        if (result.getStep3SelectElementsOutput() == null) result.setStep3SelectElementsOutput("[未能解析]");
-        if (result.getStep4SelectDesignConceptsOutput() == null) result.setStep4SelectDesignConceptsOutput("[未能解析]");
-        if (result.getStep5InstantiateElementsOutput() == null) result.setStep5InstantiateElementsOutput("[未能解析]");
-        if (result.getStep7AnalyzeDesignOutput() == null) result.setStep7AnalyzeDesignOutput("[未能解析]");
+        // If some steps failed to parse, set default values
+        if (result.getStep1ReviewInputsOutput() == null) result.setStep1ReviewInputsOutput("[Failed to parse]");
+        if (result.getStep2DetermineObjectiveOutput() == null) result.setStep2DetermineObjectiveOutput("[Failed to parse]");
+        if (result.getStep3SelectElementsOutput() == null) result.setStep3SelectElementsOutput("[Failed to parse]");
+        if (result.getStep4SelectDesignConceptsOutput() == null) result.setStep4SelectDesignConceptsOutput("[Failed to parse]");
+        if (result.getStep5InstantiateElementsOutput() == null) result.setStep5InstantiateElementsOutput("[Failed to parse]");
+        if (result.getStep7AnalyzeDesignOutput() == null) result.setStep7AnalyzeDesignOutput("[Failed to parse]");
     }
 
     private void handleStep6Output(AddIterationResult result, String step6Output) {
-        // 步骤6包含视图和决策记录，需要分离处理
+        // Step 6 contains views and decision records, needs separate handling
         List<String> mermaidViews = extractMermaidBlocks(step6Output);
         result.setStep6ViewOutputs(mermaidViews);
 
-        // 决策记录会由DesignDecisionRecorderAgent单独处理
+        // Decision recording will be handled separately by DesignDecisionRecorderAgent
     }
 
     private List<String> extractMermaidBlocks(String content) {
@@ -129,19 +129,19 @@ public class ArchitectureDesignAgent {
     }
 
     private void auditStep5Output(AddIterationResult result) {
-        // 对步骤5的架构实例化输出进行审计
+        // Audit the Step 5 architecture instantiation output
         String step5Output = result.getStep5InstantiateElementsOutput();
         if (step5Output != null && !step5Output.isEmpty()) {
             var auditDecision = auditAgent.audit(
-                    "请审查这个架构设计的步骤5输出",
+                    "Please review the Step 5 output of this architecture design",
                     step5Output
             );
 
             if (!auditDecision.isApproved()) {
-                // 如果审计不通过，尝试根据反馈改进
-                String feedback = String.join("；", auditDecision.getReasons());
+                // If audit fails, try to improve based on feedback
+                String feedback = String.join("; ", auditDecision.getReasons());
                 String improvedOutput = generationAgent.regenerate(
-                        "请根据审计反馈改进步骤5的架构设计",
+                        "Please improve the Step 5 architecture design based on audit feedback",
                         result.getStep5InstantiateElementsOutput(),
                         result.getStep5InstantiateElementsOutput(),
                         auditDecision.getReasons(),

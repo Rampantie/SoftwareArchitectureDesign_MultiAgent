@@ -28,10 +28,10 @@ public class DesignDecisionRecorderAgent {
                     stepContext, designAlternatives, chosenDesign
             );
 
-            String output = generationAgent.generate("记录架构决策", prompt);
+            String output = generationAgent.generate("Record architecture decisions", prompt);
             return parseDecisions(iterationNumber, output);
         } catch (Exception ex) {
-            throw new AgentInvocationException("决策记录Agent调用失败: " + ex.getMessage(), ex);
+            throw new AgentInvocationException("Design Decision Recorder Agent call failed: " + ex.getMessage(), ex);
         }
     }
 
