@@ -1,192 +1,192 @@
-# Multi-Agent Architecture Design System (ADD 3.0 + HPS)
+# 多智能体架构设计系统（ADD 3.0 + HPS）
 
-A multi-agent system based on **Java 17 + Spring Boot 3 + Spring AI Alibaba (DashScope/Qwen)** for completing 4 iterations of ADD 3.0 (Attribute-Driven Design) architecture design methodology.
+基于 **Java 17 + Spring Boot 3 + Spring AI Alibaba（DashScope/百炼）** 的多智能体系统，用于完成 ADD 3.0（属性驱动设计）架构设计方法论的 4 次迭代。
 
-## Quick Start
+## 快速启动
 
-### Prerequisites
+### 系统要求
 
 - JDK 17+
 - Maven 3.9+
-- Alibaba Cloud DashScope API Key (set as environment variable `AI_DASHSCOPE_API_KEY`)
+- 阿里云百炼 API Key（设置为环境变量 `AI_DASHSCOPE_API_KEY`）
 
-### Startup Instructions
+### 启动步骤
 
-#### 1. Set API Key
+#### 1. 设置 API 密钥
 
-**On Windows (PowerShell):**
+**Windows (PowerShell):**
 ```powershell
-$env:AI_DASHSCOPE_API_KEY="sk-your-dashscope-api-key"
+$env:AI_DASHSCOPE_API_KEY="sk-你的百炼API密钥"
 $env:DASHSCOPE_MODEL="qwen3-235b-a22b-instruct-2507"
 ```
 
-**On Linux/macOS (Bash):**
+**Linux/macOS (Bash):**
 ```bash
-export AI_DASHSCOPE_API_KEY="sk-your-dashscope-api-key"
+export AI_DASHSCOPE_API_KEY="sk-你的百炼API密钥"
 export DASHSCOPE_MODEL="qwen3-235b-a22b-instruct-2507"
 ```
 
-#### 2. Build and Run
+#### 2. 构建和运行
 
 ```bash
-# Build the project
+# 构建项目
 mvn clean package -DskipTests
 
-# Run the Spring Boot application
+# 运行 Spring Boot 应用
 mvn spring-boot:run
 ```
 
-The service will start on the default port: **`8080`**
+服务将在默认端口启动：**`8080`**
 
-#### 3. Trigger Architecture Design Iterations
+#### 3. 触发架构设计迭代
 
-**Option A: Using cURL**
+**方式 A：使用 cURL**
 ```bash
 curl -X POST http://localhost:8080/api/v1/agents/architecture/design-iterations \
   -H "Content-Type: application/json" \
   -d "{}"
 ```
 
-**Option B: Using Postman**
-- Method: `POST`
-- URL: `http://localhost:8080/api/v1/agents/architecture/design-iterations`
-- Headers: `Content-Type: application/json`
-- Body: `{}` (empty JSON object)
+**方式 B：使用 Postman**
+- 方法：`POST`
+- URL：`http://localhost:8080/api/v1/agents/architecture/design-iterations`
+- Headers：`Content-Type: application/json`
+- Body：`{}` （空 JSON 对象）
 
-The system will execute all 4 ADD iterations and automatically generate the complete dialogue log.
+系统将执行全部 4 次 ADD 迭代，并自动生成完整的对话日志。
 
 ---
 
-## Input and Output Locations
+## 输入输出位置
 
-### Output Files and Logs
+### 输出文件和日志
 
-| File/Directory | Location | Purpose | Description |
+| 文件/目录 | 位置 | 用途 | 说明 |
 |---|---|---|---|
-| **Dialogue Log** | `./dialogue_logs/complete_dialogue_log.md` | Course assignment submission | Complete interaction log of all 4 iterations in English |
-| **Console Output** | Console/Terminal | Real-time progress monitoring | Shows each iteration start/complete and token usage |
-| **Token Usage Report** | Within dialogue log | Token consumption analysis | Detailed token usage per step and agent interaction count |
+| **对话日志** | `./dialogue_logs/complete_dialogue_log.md` | 课程作业提交 | 4 个迭代的完整交互日志（英文） |
+| **控制台输出** | 控制台/终端 | 实时进度监控 | 显示每次迭代的开始/完成和 token 统计 |
+| **Token 统计报告** | 对话日志内 | Token 消耗分析 | 每个步骤的详细 token 消耗和 API 调用计数 |
 
-### How to Access Output Files
+### 如何访问输出文件
 
-After triggering the design iterations via the API endpoint, the system will:
+通过 API 端点触发设计迭代后，系统将：
 
-1. **Execute 4 iterations** sequentially (approximately 5-15 minutes depending on LLM response time)
-2. **Log all interactions** to DialogueLogService in memory
-3. **Generate complete dialogue log** as `./dialogue_logs/complete_dialogue_log.md`
-4. **Export token statistics** to the same dialogue log file
+1. **执行 4 次迭代**（大约需要 5-15 分钟，取决于 LLM 响应时间）
+2. **记录所有交互**到 DialogueLogService
+3. **生成完整对话日志** 为 `./dialogue_logs/complete_dialogue_log.md`
+4. **导出 Token 统计**到同一对话日志文件
 
-**To retrieve the generated file:**
+**获取生成的文件：**
 ```bash
-# View the complete dialogue log
+# 查看完整的对话日志
 cat dialogue_logs/complete_dialogue_log.md
 
-# Or open in your preferred text editor
-# The file is in Markdown format, ready for submission
+# 或用文本编辑器打开
+# 文件为 Markdown 格式，可直接提交作业
 ```
 
 ---
 
-## Agent Architecture
+## 智能体架构
 
-### Core Agents (5 total)
+### 核心智能体（5 个）
 
-| Agent | Responsibility | Description |
+| 智能体 | 职责 | 说明 |
 |-------|---|---|
-| **GenerationAgent** | Content generation | Generates architecture design content; new `generateWithFormat()` supports structured output |
-| **AuditAgent** | Quality audit | Reviews generated content for accuracy, completeness, and compliance; outputs structured JSON |
-| **ArchitectureDesignAgent** ⭐ | ADD 3.0 orchestration | Drives the 7-step ADD methodology; orchestrates one complete architecture design iteration |
-| **ArchitectureViewGeneratorAgent** | View generation | Generates Mermaid-format architecture diagrams (C1/C2/C3/Deployment/Monitoring views) |
-| **DesignDecisionRecorderAgent** | Decision recording | Records architecture decisions in structured format; generates Architecture Decision Records (ADR) |
+| **GenerationAgent** | 内容生成 | 根据 prompt 生成架构设计内容；新增 `generateWithFormat()` 支持结构化输出 |
+| **AuditAgent** | 质量审计 | 审查生成内容的准确性、完整性和合规性；输出结构化 JSON |
+| **ArchitectureDesignAgent** ⭐ | ADD 3.0 编排 | 驱动 7 步 ADD 方法论；编排一次完整的架构设计迭代 |
+| **ArchitectureViewGeneratorAgent** | 视图生成 | 生成 Mermaid 格式的架构图（C1/C2/C3/部署/监控视图） |
+| **DesignDecisionRecorderAgent** | 决策记录 | 结构化记录架构决策；生成架构决策记录（ADR） |
 
-### Orchestration Services (2 total)
+### 编排服务（2 个）
 
-| Service | Responsibility | Description |
-|---------|---|---|
-| **MultiAgentOrchestratorService** | Single-shot generation + audit | Legacy system: Generate → Audit → Retry |
-| **IterationOrchestrationService** ⭐ | 4-iteration management | New system: Drives 4 complete ADD iterations; maintains context between iterations |
+| 服务 | 职责 | 说明 |
+|--------|---|---|
+| **MultiAgentOrchestratorService** | 单次生成+审计 | 旧系统：生成 → 审计 → 重试 |
+| **IterationOrchestrationService** ⭐ | 4 迭代管理 | 新系统：驱动 4 次完整 ADD 迭代；维护迭代间上下文 |
 
-### Logging Service
+### 日志服务
 
-| Service | Responsibility | Description |
-|---------|---|---|
-| **DialogueLogService** | Dialogue logging | Records complete interaction log for all agent executions (with timestamps); supports Markdown export |
-| **TokenUsageTracker** | Token accounting | Tracks actual API calls and real token consumption (Chinese chars: 1 token each; English: ~0.25 tokens per word) |
+| 服务 | 职责 | 说明 |
+|--------|---|---|
+| **DialogueLogService** | 对话日志记录 | 记录所有智能体执行的完整交互日志（含时间戳）；支持 Markdown 导出 |
+| **TokenUsageTracker** | Token 计数 | 追踪实际 API 调用和真实 token 消耗（中文：每字 1 token；英文：每词 0.25 token） |
 
 ---
 
-## Execution Flow (ADD 3.0 - 4 Iterations)
+## 执行流程（ADD 3.0 - 4 次迭代）
 
 ```mermaid
 flowchart TD
-    user["User"] -->|Trigger /architecture/design-iterations| api["REST API Endpoint"]
+    user["用户"] -->|触发 /architecture/design-iterations| api["REST API 端点"]
     api --> orch["IterationOrchestrationService"]
     
-    orch -->|Iteration 1| iter1["Iteration 1: Establish overall system structure"]
-    orch -->|Iteration 2| iter2["Iteration 2: Identify architecture supporting main functions"]
-    orch -->|Iteration 3| iter3["Iteration 3: Handle reliability and availability quality attributes"]
-    orch -->|Iteration 4| iter4["Iteration 4: Handle development and operations"]
+    orch -->|迭代 1| iter1["迭代 1：建立整体系统结构"]
+    orch -->|迭代 2| iter2["迭代 2：确定支持主要功能的架构"]
+    orch -->|迭代 3| iter3["迭代 3：处理可靠性和可用性质量属性"]
+    orch -->|迭代 4| iter4["迭代 4：处理开发和运维"]
     
-    iter1 --> arch1["ArchitectureDesignAgent: Execute 7 ADD Steps"]
-    iter2 --> arch2["ArchitectureDesignAgent: Execute 7 ADD Steps"]
-    iter3 --> arch3["ArchitectureDesignAgent: Execute 7 ADD Steps"]
-    iter4 --> arch4["ArchitectureDesignAgent: Execute 7 ADD Steps"]
+    iter1 --> arch1["ArchitectureDesignAgent：执行 7 个 ADD 步骤"]
+    iter2 --> arch2["ArchitectureDesignAgent：执行 7 个 ADD 步骤"]
+    iter3 --> arch3["ArchitectureDesignAgent：执行 7 个 ADD 步骤"]
+    iter4 --> arch4["ArchitectureDesignAgent：执行 7 个 ADD 步骤"]
     
-    arch1 -->|Step 1-5| gen1["GenerationAgent.generateWithFormat"]
-    arch2 -->|Step 1-5| gen2["GenerationAgent.generateWithFormat"]
-    arch3 -->|Step 1-5| gen3["GenerationAgent.generateWithFormat"]
-    arch4 -->|Step 1-5| gen4["GenerationAgent.generateWithFormat"]
+    arch1 -->|步骤 1-5| gen1["GenerationAgent.generateWithFormat"]
+    arch2 -->|步骤 1-5| gen2["GenerationAgent.generateWithFormat"]
+    arch3 -->|步骤 1-5| gen3["GenerationAgent.generateWithFormat"]
+    arch4 -->|步骤 1-5| gen4["GenerationAgent.generateWithFormat"]
     
-    gen1 -->|LLM API Call| llm["DashScope Qwen 3-235B"]
-    gen2 -->|LLM API Call| llm
-    gen3 -->|LLM API Call| llm
-    gen4 -->|LLM API Call| llm
+    gen1 -->|LLM API 调用| llm["DashScope Qwen 3-235B"]
+    gen2 -->|LLM API 调用| llm
+    gen3 -->|LLM API 调用| llm
+    gen4 -->|LLM API 调用| llm
     
-    arch1 -->|Audit Step 5| audit1["AuditAgent"]
-    arch2 -->|Audit Step 5| audit2["AuditAgent"]
-    arch3 -->|Audit Step 5| audit3["AuditAgent"]
-    arch4 -->|Audit Step 5| audit4["AuditAgent"]
+    arch1 -->|审计步骤 5| audit1["AuditAgent"]
+    arch2 -->|审计步骤 5| audit2["AuditAgent"]
+    arch3 -->|审计步骤 5| audit3["AuditAgent"]
+    arch4 -->|审计步骤 5| audit4["AuditAgent"]
     
-    audit1 -->|Regenerate if failed| gen1
-    audit2 -->|Regenerate if failed| gen2
-    audit3 -->|Regenerate if failed| gen3
-    audit4 -->|Regenerate if failed| gen4
+    audit1 -->|失败则重新生成| gen1
+    audit2 -->|失败则重新生成| gen2
+    audit3 -->|失败则重新生成| gen3
+    audit4 -->|失败则重新生成| gen4
     
-    arch1 -->|Step 6a: Generate views| view["ArchitectureViewGeneratorAgent"]
-    arch1 -->|Step 6b: Record decisions| decision["DesignDecisionRecorderAgent"]
+    arch1 -->|步骤 6a：生成视图| view["ArchitectureViewGeneratorAgent"]
+    arch1 -->|步骤 6b：记录决策| decision["DesignDecisionRecorderAgent"]
     
-    arch1 -->|Log interaction| log["DialogueLogService"]
-    arch2 -->|Log interaction| log
-    arch3 -->|Log interaction| log
-    arch4 -->|Log interaction| log
+    arch1 -->|记录交互| log["DialogueLogService"]
+    arch2 -->|记录交互| log
+    arch3 -->|记录交互| log
+    arch4 -->|记录交互| log
     
-    log -->|Export to Markdown| report["dialogue_logs/complete_dialogue_log.md"]
+    log -->|导出为 Markdown| report["dialogue_logs/complete_dialogue_log.md"]
     
-    orch -->|Return results| resp["REST API Response: 4 iterations completed"]
+    orch -->|返回结果| resp["REST API 响应：4 次迭代完成"]
 ```
 
-### ADD 3.0 Seven Steps (per iteration)
+### ADD 3.0 七个步骤（每次迭代）
 
-Each iteration completed by **ArchitectureDesignAgent** follows these steps:
+**ArchitectureDesignAgent** 在每次迭代中遵循以下步骤：
 
-1. **Step 1 - Review Inputs**: Identify architecture driving factors (requirements, quality attributes, constraints)
-2. **Step 2 - Determine Iteration Objective**: Select key driving factors to address in this iteration
-3. **Step 3 - Choose System Elements**: Select architecture elements to refine/design (system, subsystems, modules)
-4. **Step 4 - Choose Design Concept**: Evaluate multiple design options; select the best approach
-5. **Step 5 - Instantiate Architecture Elements**: Define concrete components, responsibilities, interfaces, relationships
-6. **Step 6a - Generate Architecture Views**: Create Mermaid diagrams (C1 System Context, C2 Container, C3 Component, etc.)
-7. **Step 6b - Record Architecture Decisions**: Document key design decisions with context, alternatives, rationale, quality attributes
-8. **Step 7 - Analyze Design**: Evaluate if iteration objectives are met; determine if further iterations are needed
+1. **步骤 1 - 评审输入**：识别架构驱动因素（需求、质量属性、约束）
+2. **步骤 2 - 确定迭代目标**：选择本轮重点解决的问题
+3. **步骤 3 - 选择系统要素**：选择要设计的架构要素（系统、子系统、模块）
+4. **步骤 4 - 选择设计概念**：评估多个设计方案；选择最优方案
+5. **步骤 5 - 实例化架构要素**：定义具体的组件、职责、接口、关系
+6. **步骤 6a - 生成架构视图**：创建 Mermaid 图表（C1 系统上下文、C2 容器、C3 组件等）
+7. **步骤 6b - 记录架构决策**：用背景、备选项、理由、质量属性记录关键设计决策
+8. **步骤 7 - 分析设计**：评估是否满足迭代目标；判断是否需要继续迭代
 
 ---
 
-## API Endpoints
+## API 端点
 
-### 1. Health Check
+### 1. 健康检查
 
 **GET** `http://localhost:8080/api/v1/agents/health`
 
-Response:
+响应：
 ```json
 {
   "status": "UP",
@@ -194,7 +194,7 @@ Response:
 }
 ```
 
-### 2. Execute Complete ADD 4-Iteration Design ⭐ (Main Entry Point)
+### 2. 执行完整的 ADD 4 迭代设计 ⭐ （主入口）
 
 **POST** `http://localhost:8080/api/v1/agents/architecture/design-iterations`
 
@@ -203,56 +203,56 @@ Headers:
 Content-Type: application/json
 ```
 
-Body: (empty JSON object, no additional parameters needed)
+Body：（空 JSON 对象，无需额外参数）
 ```json
 {}
 ```
 
-Response:
+响应：
 ```json
 {
   "status": "success",
-  "message": "Completed 4 iterations of architecture design",
+  "message": "完成了 4 次迭代的架构设计",
   "iterationCount": 4,
   "totalExecutionTimeMs": 180000,
   "results": [
     {
       "iteration": 1,
-      "objective": "Establish overall system structure - Define top-level architecture and core modules",
+      "objective": "建立整体系统结构 - 定义顶层架构和核心模块",
       "status": "SUCCESS",
       "executionTimeMs": 45000,
       "traceId": "trace_1234567890",
-      "step7AnalysisOutput": "[Final analysis from iteration 1]"
+      "step7AnalysisOutput": "[迭代 1 的最终分析]"
     },
     {
       "iteration": 2,
-      "objective": "Identify architecture supporting main functions - Refine implementation for 6 HPS use cases",
+      "objective": "确定支持主要功能的架构 - 完善 6 个 HPS 用例的实现",
       "status": "SUCCESS",
       "executionTimeMs": 45000,
       "traceId": "trace_1234567891",
-      "step7AnalysisOutput": "[Final analysis from iteration 2]"
+      "step7AnalysisOutput": "[迭代 2 的最终分析]"
     },
     {
       "iteration": 3,
-      "objective": "Handle reliability and availability quality attributes - Design high-availability, high-reliability system",
+      "objective": "处理可靠性和可用性质量属性 - 设计高可靠高可用系统",
       "status": "SUCCESS",
       "executionTimeMs": 45000,
       "traceId": "trace_1234567892",
-      "step7AnalysisOutput": "[Final analysis from iteration 3]"
+      "step7AnalysisOutput": "[迭代 3 的最终分析]"
     },
     {
       "iteration": 4,
-      "objective": "Handle development and operations - Deployment architecture, monitoring, CI/CD, team allocation",
+      "objective": "处理开发与运维 - 部署架构、监控、CI/CD、团队分配",
       "status": "SUCCESS",
       "executionTimeMs": 45000,
       "traceId": "trace_1234567893",
-      "step7AnalysisOutput": "[Final analysis from iteration 4]"
+      "step7AnalysisOutput": "[迭代 4 的最终分析]"
     }
   ]
 }
 ```
 
-### 3. Legacy: Generate + Audit (Old Interface)
+### 3. 旧系统：生成 + 审计（遗留接口）
 
 **POST** `http://localhost:8080/api/v1/agents/generate-and-audit`
 
@@ -264,167 +264,167 @@ Content-Type: application/json
 Body:
 ```json
 {
-  "input": "Please explain layered architecture in software architecture",
-  "context": "Course assignment context"
+  "input": "请解释软件体系结构中的分层架构",
+  "context": "课程作业上下文"
 }
 ```
 
 ---
 
-## Output Dialogue Log Structure
+## 输出对话日志结构
 
-### Markdown Export Format
+### Markdown 导出格式
 
-The `complete_dialogue_log.md` file contains:
+`complete_dialogue_log.md` 文件包含：
 
 ```markdown
-# Multi-Agent Architecture Design System - Complete Dialogue Log and Design Documentation
+# 多智能体架构设计系统 - 完整对话日志和设计文档
 
-Generated at: 2026-05-27 14:30:45
+生成时间：2026-05-27 14:30:45
 
 ---
 
-## Iteration 1: Establish overall system structure - Define top-level architecture and core modules
+## 迭代 1：建立整体系统结构 - 定义顶层架构和核心模块
 
 ### START - IterationOrchestrator
-Time: 2026-05-27 14:30:45
-Status: ITERATION_START
-Objective: Establish overall system structure - Define top-level architecture and core modules
+时间：2026-05-27 14:30:45
+状态：迭代开始
+目标：建立整体系统结构 - 定义顶层架构和核心模块
 
 ---
 
 ### EXECUTION - ArchitectureDesignAgent
-Time: 2026-05-27 14:31:00
-Agent: ArchitectureDesignAgent
-Trace ID: trace_1234567890
+时间：2026-05-27 14:31:00
+智能体：ArchitectureDesignAgent
+追踪 ID：trace_1234567890
 
-#### Step 1: Review Inputs
-[Architecture driving factors identified...]
+#### 步骤 1：评审输入
+[识别的架构驱动因素...]
 
-#### Step 2: Determine Iteration Objective
-[Iteration objective and focus...]
+#### 步骤 2：确定迭代目标
+[迭代目标和重点...]
 
-#### Step 3: Select System Elements
-[Selected elements to be refined...]
+#### 步骤 3：选择系统要素
+[要精化的已选择元素...]
 
-#### Step 4: Select Design Concept
-[Multiple design options evaluated...]
+#### 步骤 4：选择设计概念
+[评估的多个设计方案...]
 
-#### Step 5: Instantiate Architecture Elements
-[Concrete components and interface definitions...]
+#### 步骤 5：实例化架构要素
+[具体的组件和接口定义...]
 
-#### Step 6a: Generate Architecture Views
-[Mermaid diagrams in code blocks]
+#### 步骤 6a：生成架构视图
+[代码块中的 Mermaid 图表]
 
-#### Step 6b: Record Design Decisions
-[Structured decision records with rationale...]
+#### 步骤 6b：记录设计决策
+[带有理由的结构化决策记录...]
 
-#### Step 7: Analyze Design
-[Analysis of whether objectives are met...]
+#### 步骤 7：分析设计
+[目标是否被满足的分析...]
 
 ---
 
-### TOKEN USAGE - Iteration 1
-Total Tokens: 8750
-- GenerationAgent: 6500 tokens (Step 1-7 generation)
-- AuditAgent: 2250 tokens (Step 5 audit)
-- Total Actual API Calls: 3 (2 generation calls + 1 audit call)
+### TOKEN 使用统计 - 迭代 1
+总计 Token：8750
+- GenerationAgent：6500 tokens（步骤 1-7 生成）
+- AuditAgent：2250 tokens（步骤 5 审计）
+- 总计实际 API 调用：3 次（2 次生成 + 1 次审计）
 
 ---
 
 ### COMPLETE - IterationOrchestrator
-Time: 2026-05-27 14:32:15
-Status: ITERATION_COMPLETE
-Execution Time: 90 seconds
+时间：2026-05-27 14:32:15
+状态：迭代完成
+执行时间：90 秒
 
 ---
 
-## Iteration 2: Identify architecture supporting main functions...
-[Similar structure for iterations 2-4]
+## 迭代 2：确定支持主要功能的架构...
+[迭代 2-4 的相似结构]
 
 ---
 
-## TOKEN USAGE ANALYSIS - Summary
+## TOKEN 使用分析 - 汇总
 
-### Token Usage Details by Step
-| Agent | Step | Input Tokens | Output Tokens | Total Tokens |
-|-------|------|-------------|---------------|-------------|
+### 各步骤 Token 使用详情
+| 智能体 | 步骤 | 输入 Token | 输出 Token | 总 Token |
+|-------|------|-----------|----------|---------|
 | GenerationAgent | 5 | 2500 | 1200 | 3700 |
 | GenerationAgent | 6 | 1800 | 850 | 2650 |
 | AuditAgent | 5 | 1200 | 600 | 1800 |
 | ... | ... | ... | ... | ... |
 
-### API Interaction Statistics
-- Total Actual API Calls: 12
-- GenerationAgent Calls: 8
-- AuditAgent Calls: 4
-- Total Iterations Completed: 4
-- Successful Iterations: 4
-- Failed Audits (Regenerated): 2
+### API 交互统计
+- 总实际 API 调用：12 次
+- GenerationAgent 调用：8 次
+- AuditAgent 调用：4 次
+- 完成的迭代总数：4
+- 成功迭代：4
+- 失败审计（重新生成）：2 次
 
-### Cost Estimation
-(Based on DashScope pricing: ¥0.0005 per 1K input tokens, ¥0.0015 per 1K output tokens)
-- Total Input Tokens: 28,750
-- Total Output Tokens: 18,250
-- Estimated Cost: ¥17.58 CNY
+### 成本估算
+（基于百炼定价：输入 Token ¥0.0005/1K，输出 Token ¥0.0015/1K）
+- 总输入 Token：28,750
+- 总输出 Token：18,250
+- 估算成本：¥17.58 CNY
 ```
 
 ---
 
-## File Structure and Organization
+## 文件结构和组织
 
 ```
 SoftwareArchitectureDesign_MultiAgent/
 ├── src/main/java/com/rampantie/multiagent/
 │   ├── agent/
-│   │   ├── GenerationAgent.java                    - Core content generation
-│   │   ├── AuditAgent.java                         - Quality audit
-│   │   ├── ArchitectureDesignAgent.java            - ADD 3.0 orchestration (NEW)
-│   │   ├── ArchitectureViewGeneratorAgent.java     - Mermaid diagram generation (NEW)
-│   │   └── DesignDecisionRecorderAgent.java        - Decision recording (NEW)
+│   │   ├── GenerationAgent.java                    - 核心内容生成
+│   │   ├── AuditAgent.java                         - 质量审计
+│   │   ├── ArchitectureDesignAgent.java            - ADD 3.0 编排（新增）
+│   │   ├── ArchitectureViewGeneratorAgent.java     - Mermaid 图表生成（新增）
+│   │   └── DesignDecisionRecorderAgent.java        - 决策记录（新增）
 │   ├── service/
-│   │   ├── MultiAgentOrchestratorService.java      - Single shot: generate + audit
-│   │   ├── IterationOrchestrationService.java      - 4-iteration orchestration (NEW)
-│   │   ├── DialogueLogService.java                 - Interaction logging (NEW)
-│   │   └── TokenUsageTracker.java                  - Token accounting (NEW)
+│   │   ├── MultiAgentOrchestratorService.java      - 单次：生成 + 审计
+│   │   ├── IterationOrchestrationService.java      - 4 迭代编排（新增）
+│   │   ├── DialogueLogService.java                 - 交互日志记录（新增）
+│   │   └── TokenUsageTracker.java                  - Token 计数（新增）
 │   ├── domain/
-│   │   ├── AddIterationResult.java                 - Iteration result model (NEW)
-│   │   ├── DesignDecision.java                     - Architecture decision record (NEW)
-│   │   ├── IterationContext.java                   - Iteration context (NEW)
-│   │   ├── AddPromptTemplates.java                 - ADD 3.0 prompt templates (NEW)
-│   │   └── TokenUsage.java                         - Token usage data model (NEW)
+│   │   ├── AddIterationResult.java                 - 迭代结果模型（新增）
+│   │   ├── DesignDecision.java                     - 架构决策记录（新增）
+│   │   ├── IterationContext.java                   - 迭代上下文（新增）
+│   │   ├── AddPromptTemplates.java                 - ADD 3.0 提示词模板（新增）
+│   │   └── TokenUsage.java                         - Token 使用数据模型（新增）
 │   ├── controller/
-│   │   └── AgentController.java                    - REST API endpoints
+│   │   └── AgentController.java                    - REST API 端点
 │   ├── audit/
-│   │   ├── AuditDecision.java                      - Audit result model
-│   │   └── AuditResultParser.java                  - Audit JSON parser
-│   ├── api/dto/                                    - Request/response models
-│   ├── config/                                     - Spring configuration
-│   └── exception/                                  - Exception classes
+│   │   ├── AuditDecision.java                      - 审计结果模型
+│   │   └── AuditResultParser.java                  - 审计 JSON 解析器
+│   ├── api/dto/                                    - 请求/响应模型
+│   ├── config/                                     - Spring 配置
+│   └── exception/                                  - 异常类
 │
 ├── src/main/resources/
-│   ├── application.yml                             - Application configuration
-│   └── logback-spring.xml                          - Logging configuration
+│   ├── application.yml                             - 应用配置
+│   └── logback-spring.xml                          - 日志配置
 │
 ├── dialogue_logs/
-│   └── complete_dialogue_log.md                    - Generated dialogue log (OUTPUT)
+│   └── complete_dialogue_log.md                    - 生成的对话日志（输出）
 │
-├── pom.xml                                         - Maven configuration
-└── README.md                                       - This file
+├── pom.xml                                         - Maven 配置
+└── README.md                                       - 本文件
 ```
 
 ---
 
-## Configuration
+## 配置
 
-### Environment Variables
+### 环境变量
 
-| Variable | Value | Description |
-|----------|-------|---|
-| `AI_DASHSCOPE_API_KEY` | `sk-xxxxx` | **Required**: DashScope API key from Alibaba Cloud |
-| `DASHSCOPE_MODEL` | `qwen3-235b-a22b-instruct-2507` | LLM model name (default if not set) |
+| 变量 | 值 | 说明 |
+|-----|-----|---|
+| `AI_DASHSCOPE_API_KEY` | `sk-xxxxx` | **必需**：来自阿里云的百炼 API 密钥 |
+| `DASHSCOPE_MODEL` | `qwen3-235b-a22b-instruct-2507` | LLM 模型名（默认值） |
 
-### Application Properties (`src/main/resources/application.yml`)
+### 应用配置（`src/main/resources/application.yml`）
 
 ```yaml
 spring:
@@ -435,298 +435,297 @@ spring:
   
 multi-agent:
   orchestration:
-    max-retries: 2                    # Max regeneration attempts on audit failure
+    max-retries: 2                    # 审计失败时最多重生成次数
   dialogue-log:
-    export-format: markdown           # Export format for dialogue log
+    export-format: markdown           # 对话日志导出格式
 ```
 
-### Model Selection
+### 模型选择
 
-| Model | Use Case | Recommendation |
-|-------|----------|---|
-| `qwen3-235b-a22b-instruct-2507` | Architecture design, instruction following | ✅ Recommended for this system |
-| `qwen3-235b-a22b-thinking-2507` | Complex reasoning, chain-of-thought | Advanced use (slower) |
+| 模型 | 用途 | 建议 |
+|------|------|---|
+| `qwen3-235b-a22b-instruct-2507` | 架构设计、指令遵循 | ✅ 推荐用于本系统 |
+| `qwen3-235b-a22b-thinking-2507` | 复杂推理、链式思考 | 高级用途（速度较慢） |
 
-**Verify model availability** in [Alibaba Cloud DashScope Console](https://bailian.console.aliyun.com/) and ensure API Key region matches model service region.
+**验证模型可用性**：在 [阿里云百炼控制台](https://bailian.console.aliyun.com/) 确认模型已开通，且 API Key 地域与模型服务地域一致。
 
 ---
 
-## Data Flow and Token Tracking
+## 数据流和 Token 追踪
 
-### Real Token Consumption Algorithm
+### 真实 Token 消耗算法
 
-The system tracks **actual token usage** (not estimates):
+系统追踪**实际的 token 消耗**（非估算值）：
 
-**Chinese Character Handling:**
-- 1 Chinese character (0x4E00-0x9FFF) = 1 token
-- Example: "架构设计" (4 chars) = 4 tokens
+**中文字符处理：**
+- 1 个中文字符（0x4E00-0x9FFF）= 1 token
+- 示例："架构设计"（4 字符）= 4 tokens
 
-**English Text Handling:**
-- Average 0.25 tokens per English word (based on DashScope tokenization)
-- Example: "system architecture" (2 words) ≈ 0.5 tokens
+**英文文本处理：**
+- 平均每个英文词 0.25 token（基于百炼分词）
+- 示例："system architecture"（2 词）≈ 0.5 tokens
 
-**Whitespace:**
-- Spaces and newlines are not counted
+**空格：**
+- 空格和换行不计数
 
-**Interaction Tracking:**
-- Each API call to GenerationAgent or AuditAgent is counted as 1 interaction
-- Total interactions = number of actual LLM API calls made
-- On audit failure, regeneration counts as additional interaction
+**交互追踪：**
+- 每个 API 调用（GenerationAgent 或 AuditAgent）计为 1 次交互
+- 总交互数 = 实际 LLM API 调用次数
+- 审计失败时，重新生成计为额外的交互
 
-### Token Usage Report Example
+### Token 使用报告示例
 
 ```
-# Token Usage Analysis - Summary
+# Token 使用分析 - 汇总
 
-| Agent | Step | Input Tokens | Output Tokens | Total Tokens |
-|-------|------|-------------|---------------|-------------|
+| 智能体 | 步骤 | 输入 Token | 输出 Token | 总 Token |
+|-------|------|-----------|----------|---------|
 | GenerationAgent | 5 | 2500 | 1200 | 3700 |
 | AuditAgent | 5 | 1200 | 600 | 1800 |
 | GenerationAgent | 6 | 1800 | 850 | 2650 |
 
-**Total Actual API Calls**: 3
-**Total Tokens Consumed**: 8150
-**Estimated Cost** (at DashScope rates): ¥4.87 CNY
+**总实际 API 调用**：3 次
+**总 Token 消耗**：8150
+**估算成本**（按百炼价格）：¥4.87 CNY
 ```
 
 ---
 
-## Hotel Pricing System (HPS) - Included Business Context
+## 酒店定价系统（HPS）- 内置业务上下文
 
-The system comes with complete pre-built business context for the Hotel Pricing System:
+系统预装了酒店定价系统的完整业务上下文：
 
-### Use Cases
-- **HPS-1**: Login - User authentication and authorization
-- **HPS-2**: Change Price - Modify base room rates with real-time price publication
-- **HPS-3**: Query Price - Retrieve prices through UI or API
-- **HPS-4**: Manage Hotel - Administrator hotel information management
-- **HPS-5**: Manage Room Rate - Define business rules and rate types
-- **HPS-6**: Manage Users - User permission management
+### 用例（6 个）
+- **HPS-1**：登录 - 用户身份认证和授权
+- **HPS-2**：修改价格 - 修改基础房价，实时发布价格
+- **HPS-3**：查询价格 - 通过 UI 或 API 检索价格
+- **HPS-4**：管理酒店 - 管理员管理酒店信息
+- **HPS-5**：管理房价 - 定义业务规则和房价类型
+- **HPS-6**：管理用户 - 用户权限管理
 
-### Quality Attributes (9 total)
-- **Q-1 Performance**: <100ms for price publication
-- **Q-2 Reliability**: 100% successful price change publication
-- **Q-3 Availability**: 99.9% uptime SLA
-- **Q-4 Scalability**: Support 100K-1M queries/day with ≤20% latency increase
-- **Q-5 Security**: Login verification, permission control, credential storage
-- **Q-6 Modifiability**: Adding gRPC endpoint requires no core changes
-- **Q-7 Deployability**: Cross-environment migration requires no code changes
-- **Q-8 Monitorability**: Collect 100% of performance/reliability data
-- **Q-9 Testability**: 100% support for integration testing
+### 质量属性（9 个）
+- **Q-1 性能**：价格发布 <100ms
+- **Q-2 可靠性**：100% 成功发布价格变更
+- **Q-3 可用性**：99.9% 正常运行时间 SLA
+- **Q-4 可扩展性**：支持 10 万-100 万查询/天，延迟增加 ≤20%
+- **Q-5 安全性**：登录验证、权限控制、凭证存储
+- **Q-6 可修改性**：添加 gRPC 端点无需修改核心
+- **Q-7 可部署性**：跨环境迁移无需代码修改
+- **Q-8 可监控性**：采集 100% 的性能/可靠性数据
+- **Q-9 可测试性**：100% 支持集成测试
 
-### Architecture Concerns (5 total)
-- **CRN-1**: Establish overall system structure
-- **CRN-2**: Leverage team expertise in Java, Angular, Kafka
-- **CRN-3**: Allocate work to development team members
-- **CRN-4**: Avoid introducing technical debt
-- **CRN-5**: Establish continuous deployment infrastructure
+### 架构关注点（5 个）
+- **CRN-1**：建立整体系统结构
+- **CRN-2**：利用团队在 Java、Angular、Kafka 的专业知识
+- **CRN-3**：为开发团队成员分配工作
+- **CRN-4**：避免引入技术债
+- **CRN-5**：建立持续部署基础设施
 
-### Constraints (6 total)
-- **CON-1**: Web browser-based, cross-platform support
-- **CON-2**: Cloud-based identity service, cloud-hosted resources
-- **CON-3**: Code on proprietary Git platform
-- **CON-4**: Full delivery in 6 months, MVP demo in 2 months
-- **CON-5**: REST API (extensible to other protocols)
-- **CON-6**: Cloud-native approach preferred
+### 约束（6 个）
+- **CON-1**：基于 Web 浏览器，支持跨平台
+- **CON-2**：云端身份服务，云端托管资源
+- **CON-3**：专有 Git 平台上的代码
+- **CON-4**：6 个月完整交付，2 个月 MVP 演示
+- **CON-5**：REST API（可扩展其他协议）
+- **CON-6**：优先云原生方案
 
 ---
 
-## Build and Test
+## 构建和测试
 
-### Build the Project
+### 构建项目
 
 ```bash
-# Clean build without running tests (faster)
+# 清理构建（不运行测试，速度快）
 mvn clean package -DskipTests
 
-# Full build with tests
+# 完整构建（包含测试）
 mvn clean package
 ```
 
-### Run Tests
+### 运行测试
 
 ```bash
-# Run all tests
+# 运行所有测试
 mvn test
 
-# Run a specific test class
+# 运行特定测试类
 mvn test -Dtest=GenerationAgentTest
 ```
 
-### Maven Dependencies
+### Maven 依赖
 
-Key dependencies:
-- **Spring Boot 3.x** - Application framework
-- **Spring AI Alibaba** - LLM integration
-- **Spring AI Core** - AI abstraction layer
-- **DashScope SDK** - Alibaba Cloud API client
-- **JUnit 5** - Testing framework
-
----
-
-## Key Features
-
-✅ **Complete ADD 3.0 Implementation**
-- Strictly follows 7-step architecture design methodology
-- Each step has clear inputs/outputs and validation
-- Supports decision tracing and rationale recording
-
-✅ **Hotel Pricing System (HPS) Business Context Pre-loaded**
-- No manual injection needed; system includes complete business context
-- Covers all 6 use cases, 9 quality attributes, 5 concerns, 6 constraints
-- Consistent context across all 4 iterations
-
-✅ **Comprehensive Audit Chain**
-- Step 5 (architecture instantiation) automatically audited for accuracy
-- Audit failures trigger automatic regeneration with feedback
-- Configurable max retry attempts (default: 2)
-
-✅ **Complete Dialogue Logging**
-- Records every agent execution with timestamps
-- Supports export to Markdown for course assignment submission
-- Includes all interactions, decisions, and analysis
-
-✅ **Architecture Decision Tracking**
-- Automatically records key design decisions
-- Captures decision context, alternatives considered, rationale, and quality attributes
-- Supports traceability for architectural decisions
-
-✅ **Multi-Iteration Context Preservation**
-- Context automatically passes between iterations
-- Allows architectural refinement across iterations
-- Supports forward compatibility checking
-
-✅ **Real Token Accounting**
-- Actual token consumption tracking (not estimates)
-- Chinese and English character differentiation
-- API interaction counting
-- Cost estimation based on real usage
-
-✅ **English-Only Generation**
-- All agent outputs generated in English
-- Explicit English-only instructions in all system prompts
-- Supports international course assignments
+关键依赖：
+- **Spring Boot 3.x** - 应用框架
+- **Spring AI Alibaba** - LLM 集成
+- **Spring AI Core** - AI 抽象层
+- **DashScope SDK** - 阿里云 API 客户端
+- **JUnit 5** - 测试框架
 
 ---
 
-## Troubleshooting
+## 核心特性
 
-### Problem: API Key Not Found
+✅ **完整的 ADD 3.0 实现**
+- 严格遵循 7 步架构设计方法论
+- 每个步骤都有明确的输入/输出和验证
+- 支持决策追踪和理由记录
 
-**Error Message:**
+✅ **酒店定价系统（HPS）业务上下文预装**
+- 无需手工注入；系统包含完整的业务上下文
+- 涵盖 6 个用例、9 个质量属性、5 个关注点、6 个约束
+- 整个 4 次迭代中保持一致的上下文
+
+✅ **完整的审计链**
+- 步骤 5（架构实例化）自动审计准确性
+- 审计失败自动重新生成并反馈
+- 可配置的最大重试次数（默认：2 次）
+
+✅ **完整的对话日志记录**
+- 记录每个智能体执行的交互（含时间戳）
+- 支持导出为 Markdown 供课程作业提交
+- 包括所有交互、决策和分析
+
+✅ **架构决策追踪**
+- 自动记录关键设计决策
+- 捕获决策背景、考虑的备选方案、理由和质量属性
+- 支持架构决策的可追溯性
+
+✅ **多迭代上下文保留**
+- 迭代间的上下文自动传递
+- 支持跨迭代的架构精化
+- 支持前后迭代的兼容性检查
+
+✅ **真实 Token 计数**
+- 实际 token 消耗追踪（非估算）
+- 中英文字符差异化处理
+- API 交互计数
+- 基于真实使用的成本估算
+
+✅ **纯英文生成**
+- 所有智能体输出以英文生成
+- 所有系统提示词中都有明确的英文指令
+- 支持国际课程作业提交
+
+---
+
+## 故障排除
+
+### 问题：找不到 API 密钥
+
+**错误信息：**
 ```
 No property 'AI_DASHSCOPE_API_KEY' found
 ```
 
-**Solution:**
-1. Verify environment variable is set: `echo $AI_DASHSCOPE_API_KEY`
-2. Restart the terminal/IDE after setting the variable
-3. Or add to `application.yml` directly (not recommended for security)
+**解决方案：**
+1. 验证环境变量是否设置：`echo $AI_DASHSCOPE_API_KEY`
+2. 设置变量后重启终端/IDE
+3. 或直接添加到 `application.yml`（不推荐，涉及安全问题）
 
-### Problem: Model Not Available
+### 问题：模型不可用
 
-**Error Message:**
+**错误信息：**
 ```
 Model qwen3-235b-a22b-instruct-2507 not found
 ```
 
-**Solution:**
-1. Verify model availability in [DashScope Console](https://bailian.console.aliyun.com/)
-2. Check API Key region matches model service region
-3. Switch to alternative model in environment variable
+**解决方案：**
+1. 在 [百炼控制台](https://bailian.console.aliyun.com/) 验证模型可用性
+2. 检查 API Key 地域与模型服务地域是否一致
+3. 在环境变量中切换到可用模型
 
-### Problem: Connection Timeout
+### 问题：连接超时
 
-**Error Message:**
+**错误信息：**
 ```
 Connection timeout after 30000ms
 ```
 
-**Solution:**
-1. Check internet connectivity
-2. Verify API endpoint accessibility: `curl https://dashscope.aliyuncs.com/api/v1/apps/agent/completion`
-3. Increase timeout in `application.yml` if needed
+**解决方案：**
+1. 检查网络连接
+2. 验证 API 端点可访问：`curl https://dashscope.aliyuncs.com/api/v1/apps/agent/completion`
+3. 如需要可在 `application.yml` 中增加超时时间
 
-### Problem: Dialogue Log Not Generated
+### 问题：对话日志未生成
 
-**Error Message:**
-No `dialogue_logs/complete_dialogue_log.md` file after API call
+**错误信息：** API 调用后 `dialogue_logs/complete_dialogue_log.md` 文件不存在
 
-**Solution:**
-1. Check if `dialogue_logs/` directory exists; create if necessary
-2. Verify Spring Boot application is still running
-3. Check console for error messages
-4. Ensure at least 1 iteration completed successfully
+**解决方案：**
+1. 检查 `dialogue_logs/` 目录是否存在；如不存在则创建
+2. 验证 Spring Boot 应用是否仍在运行
+3. 检查控制台是否有错误信息
+4. 确保至少 1 次迭代成功完成
 
 ---
 
-## Course Assignment Workflow
+## 课程作业工作流
 
-### Step 1: Prepare Environment
+### 第 1 步：准备环境
 ```bash
-# Set API key
-export AI_DASHSCOPE_API_KEY="sk-your-key"
+# 设置 API 密钥
+export AI_DASHSCOPE_API_KEY="sk-你的密钥"
 
-# Verify key is set
+# 验证密钥是否设置
 echo $AI_DASHSCOPE_API_KEY
 ```
 
-### Step 2: Start the System
+### 第 2 步：启动系统
 ```bash
-# Build and run
+# 构建和运行
 mvn clean package -DskipTests
 mvn spring-boot:run
 ```
 
-### Step 3: Trigger Design Iterations
+### 第 3 步：触发设计迭代
 ```bash
-# In another terminal, trigger the complete ADD design
+# 在另一个终端中，触发完整的 ADD 设计
 curl -X POST http://localhost:8080/api/v1/agents/architecture/design-iterations \
   -H "Content-Type: application/json" \
   -d "{}"
 ```
 
-### Step 4: Monitor Execution
-- Watch console for iteration progress
-- Each iteration takes approximately 1-5 minutes depending on LLM response time
-- Total execution time: ~5-15 minutes for all 4 iterations
+### 第 4 步：监控执行
+- 观察控制台输出查看迭代进度
+- 每次迭代大约需要 1-5 分钟（取决于 LLM 响应时间）
+- 全部 4 次迭代的总执行时间：约 5-15 分钟
 
-### Step 5: Retrieve Generated Deliverables
+### 第 5 步：获取生成的作业内容
 ```bash
-# View the complete dialogue log
+# 查看完整的对话日志
 cat dialogue_logs/complete_dialogue_log.md
 
-# Copy to assignment submission folder
+# 复制到作业提交文件夹
 cp dialogue_logs/complete_dialogue_log.md /path/to/assignment/submission/
 ```
 
-### Step 6: Submit Assignment
-- Submit `complete_dialogue_log.md` as "Complete Interaction Dialogue Log and Design Documentation"
-- The file contains:
-  - All 4 iterations of ADD 3.0 architecture design
-  - Complete dialogue/interaction logs with timestamps
-  - Architecture decision records
-  - Mermaid architecture diagrams
-  - Token usage analysis and statistics
-  - All in English
+### 第 6 步：提交作业
+- 提交 `complete_dialogue_log.md` 作为"完整交互对话日志和设计文档"
+- 文件包含：
+  - 4 次 ADD 3.0 架构设计迭代
+  - 完整的对话/交互日志（含时间戳）
+  - 架构决策记录
+  - Mermaid 架构图
+  - Token 使用分析和统计
+  - 全部内容为英文
 
 ---
 
-## Additional Resources
+## 其他资源
 
-- **ADD 3.0 Reference**: [IEEE Software Architecture Design](https://www.sei.cmu.edu/publications/)
-- **Mermaid Diagram Syntax**: [Mermaid Documentation](https://mermaid.js.org/)
-- **DashScope API**: [Alibaba Cloud DashScope](https://dashscope.aliyun.com/)
-- **Spring AI**: [Spring AI Official Documentation](https://docs.spring.io/spring-ai/reference/)
-
----
-
-## License
-
-This project is created for educational purposes as part of the Software Architecture Design course.
+- **ADD 3.0 参考**：[IEEE 软件架构设计](https://www.sei.cmu.edu/publications/)
+- **Mermaid 图表语法**：[Mermaid 官方文档](https://mermaid.js.org/)
+- **百炼 API**：[阿里云百炼](https://dashscope.aliyun.com/)
+- **Spring AI**：[Spring AI 官方文档](https://docs.spring.io/spring-ai/reference/)
 
 ---
 
-**Last Updated**: 2026-05-27
-**System Version**: 1.0
-**Status**: Complete and Ready for Assignment Submission
+## 许可证
+
+本项目作为软件体系结构设计课程的一部分创建，用于教育目的。
+
+---
+
+**最后更新**：2026-05-27
+**系统版本**：1.0
+**状态**：完成，可进行课程作业提交
